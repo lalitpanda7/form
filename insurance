@@ -1,0 +1,83 @@
+  
+
+//		log.info(searchText+" "+category+" "+mls);
+//		//if(mls.isEmpty() || mls.equals(null) || mls.equals("")) {
+//			if(mls=="") {        
+//			System.out.println(0);
+//		//	if(!category.isEmpty() && !category.equals(null) || !category.equals(""))
+//				if(category!="")
+//				{
+//				System.out.println(1);
+//				list1=formService.SearchFormByCategoryList(category);
+//		//		   if(!searchText.isEmpty() || !searchText.equals(null) || !searchText.equals(""))
+//	    		   if(searchText!="")
+//						     {
+//					   System.out.println(2);
+//				            	for(int i=0;i<list1.size();i++)
+//					              	if(list1.get(i).getDescription().matches("(.*)"+searchText+"(.*)")||list1.get(i).getName().matches("(.*)"+searchText+"(.*)"))
+//					              		list.add(list1.get(i));
+//				      }
+//	    		   else
+//	    			   list=list1;
+//				}
+////			else if(!searchText.isEmpty() || !searchText.equals(null) || !searchText.equals(""))
+//				else if(searchText!="")
+//					 {
+//				System.out.println(3);
+//				//StringUtils.isNotBlank(cs)
+//				list1=formService.SearchAllForm();
+//				for(int i=0;i<list1.size();i++)
+//				{System.out.println(3+"."+i+"size"+list1.get(i));
+//				if(list1.get(i).getDescription()!=null&&list1.get(i).getName()!=null)
+//					if(list1.get(i).getDescription().matches("(.*)"+searchText+"(.*)")||list1.get(i).getName().matches("(.*)"+searchText+"(.*)"))
+//					{	System.out.println(list1.get(i));
+//						list.add(list1.get(i));
+//						//System.out.println(list.get(0));
+//						}
+//				
+//				}
+//				//System.out.println(3+"."+2);	
+//				
+//			}
+//			else {
+//				System.out.println(4);
+//				list=formService.SearchAllForm();}
+//				
+//		}
+//	//	else if(!mls.isEmpty() || !mls.equals(null) || !mls.equals("")) {
+//			else if(mls!="") {
+//					System.out.println(5);
+//			if(searchText==""&&category=="")
+//			{list=formService.SearchFormByMlsList(mls);
+//			System.out.println(6);
+//			}
+//			//else if(!category.isEmpty() || !category.equals(null) || !category.equals(""))
+//				else if(category!="")
+//					{
+//				System.out.println(7);
+//				list=formService.SearchFormByMlsList(mls);
+//			list1=formService.SearchFormByCategoryList(category);
+//              list1.retainAll(list);
+//              list.clear();
+//              //if(!searchText.isEmpty() || !searchText.equals(null) || !searchText.equals(""))
+//              if(searchText!="")
+//    			      {System.out.println(8);
+//			            	for(int i=0;i<list1.size();i++)
+//				              	if(list1.get(i).getDescription().matches("(.*)"+searchText+"(.*)")||list1.get(i).getName().matches("(.*)"+searchText+"(.*)"))
+//				              		list.add(list1.get(i));
+//			      }
+//			else {
+//				list=list1;
+//			System.out.println(9);
+//			}
+//              
+//              }
+//				else {
+//					list=formService.SearchAllForm();
+//				}
+//}
+//	
+//		for(int i = 0 ; i < list.size(); i++)
+//		{
+//			System.out.println(list.get(i).toString());
+//		}
