@@ -5,9 +5,10 @@ import java.util.List;
 import com.homegenius.form.bean.Form;
 import com.homegenius.form.dto.FormCreationRequest;
 import com.homegenius.form.dto.FormDomain;
+import com.homegenius.form.dto.FormInstancePreviewResponse;
 import com.homegenius.form.dto.FormResponse;
+import com.homegenius.form.dto.FormSearchResponse;
 import com.homegenius.form.dto.FormUpdationRequest;
-import com.homegenius.form.dto.User;
 import com.homegenius.form.exception.InvalidInputException;
 import com.homegenius.form.exception.RecordAlreadyExistsException;
 import com.homegenius.form.exception.RecordNotFoundException;
@@ -18,9 +19,9 @@ public interface FormService {
 
 	public boolean deleteFormById(String id);
 
-	public Form createForm(FormDomain formDomain, User user) throws InvalidInputException, RecordAlreadyExistsException;
+	public Form createForm(FormDomain formDomain) throws InvalidInputException;
 
-	public Form updateForm(Form form, User user)
+	public Form updateForm(Form form)
 			throws InvalidInputException, RecordNotFoundException, RecordAlreadyExistsException;
 
 	/**
@@ -51,12 +52,9 @@ public interface FormService {
 	 * @return
 	 */
 	public FormResponse updateFormMapping(FormUpdationRequest formUpdationRequest);
+	
+	public List<FormSearchResponse> SearchForm(String searchText,String formCategory,String formMls);
 
-	public List<Form> SearchAllForm();
-
-	public List<Form> SearchFormByMlsList(String mls);
-
-	public List<Form> SearchFormByCategoryList(String category);
 	
 	
 

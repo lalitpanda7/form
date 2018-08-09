@@ -37,9 +37,6 @@ public class GlobalControllerExceptionHandler {
 
 	private ErrorMessageHolder createErrorResponse(NonFatalException exception) {
 		ErrorMessageHolder errorHolder = new ErrorMessageHolder();
-		if (exception.getErrorCode() != null && !exception.getErrorCode().isEmpty()) {
-			errorHolder.setErrorCode(exception.getErrorCode());
-		}
 		if (exception.getMessage() != null && !exception.getMessage().isEmpty()) {
 			errorHolder.setMessage(exception.getMessage());
 		}
@@ -78,16 +75,7 @@ public class GlobalControllerExceptionHandler {
 }
 
 class ErrorMessageHolder {
-	String errorCode;
 	private String message;
-
-	public String getErrorCode() {
-		return errorCode;
-	}
-
-	public void setErrorCode(String errorCode) {
-		this.errorCode = errorCode;
-	}
 
 	public String getMessage() {
 		return message;

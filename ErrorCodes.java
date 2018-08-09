@@ -1,10 +1,19 @@
 package com.homegenius.form.controller;
 
-public class ErrorCodes {
+public enum ErrorCodes {
 
 	// FormsManagement API error codes
-	public static final String INVALID_INPUT = "invalid search parameters";
-	public static final String RECORD_NOT_FOUND = "record not found";
-	public static final String RECORD_ALREADY_EXISTS = "record already exists";
+	INVALID_INPUT("invalid search parameters"), RECORD_NOT_FOUND("record not found"), RECORD_ALREADY_EXISTS(
+			"record already exists");
+
+	private String value;
+
+	private ErrorCodes(String value) {
+		this.value = value;
+	}
+
+	public String getValue() {
+		return value;
+	}
 
 }

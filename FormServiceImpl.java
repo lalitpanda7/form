@@ -1,10 +1,16 @@
 package com.homegenius.form.service.impl;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.apache.commons.beanutils.BeanUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,15 +18,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.homegenius.form.bean.Form;
+import com.homegenius.form.bean.FormInstance;
 import com.homegenius.form.controller.ErrorCodes;
 import com.homegenius.form.dto.FormCreationRequest;
 import com.homegenius.form.dto.FormDomain;
+import com.homegenius.form.dto.FormInstancePreviewResponse;
 import com.homegenius.form.dto.FormResponse;
+import com.homegenius.form.dto.FormSearchResponse;
 import com.homegenius.form.dto.FormUpdationRequest;
-import com.homegenius.form.dto.User;
 import com.homegenius.form.exception.InvalidInputException;
 import com.homegenius.form.exception.RecordAlreadyExistsException;
 import com.homegenius.form.exception.RecordNotFoundException;
+import com.homegenius.form.repository.FormInstanceRepository;
 import com.homegenius.form.repository.FormRepository;
 import com.homegenius.form.service.FormService;
 
@@ -34,7 +43,8 @@ public class FormServiceImpl implements FormService {
 
 	@Autowired
 	private FormRepository formRepository;
-
+	@Autowired
+	private FormInstanceRepository formInstanceRepository;
 	@Override
 	public Form getFormById(String id) {
 		Form form = null;
@@ -66,18 +76,18 @@ public class FormServiceImpl implements FormService {
 	}
 
 	@Override
-	public Form createForm(FormDomain formDomain, User user)
-			throws InvalidInputException, RecordAlreadyExistsException {
+	public Form createForm(FormDomain formDomain)
+			throws InvalidInputException {
 		log.info("Method createForm started");
 		if (formDomain == null) {
-			throw new InvalidInputException(ErrorCodes.INVALID_INPUT, "Invalid input parameters");
+			throw new InvalidInputException(ErrorCodes.INVALID_INPUT.getValue());
 		}
 
 		Form form = new Form();
 		form.setId(UUID.randomUUID().toString());
-		form.setCreatedBy(user.getFullName());
+		form.setCreatedBy(formDomain.getCreatedBy());
 		form.setCreatedOn(new DateTime());
-		form.setUpdatedBy(user.getFullName());
+		form.setUpdatedBy(formDomain.getUpdatedBy());
 		form.setUpdatedOn(new DateTime());
 		form.setDeleted(formDomain.isDeleted());
 		form.setDescription(formDomain.getDescription());
@@ -88,16 +98,6 @@ public class FormServiceImpl implements FormService {
 		form.setMlsList(formDomain.getMlsList());
 		form.setName(formDomain.getName());
 		form.setReadOnly(formDomain.isReadOnly());
-
-		List<Form> formList = (List<Form>) formRepository.findAll();
-		if (formList != null && !formList.isEmpty()) {
-			for (Form formIteration : formList) {
-				if (formIteration.equals(form)) {
-					throw new RecordAlreadyExistsException(ErrorCodes.RECORD_ALREADY_EXISTS,
-							"This Record already exists");
-				}
-			}
-		}
 		formRepository.save(form);
 
 		log.info("Method createForm completed");
@@ -105,19 +105,19 @@ public class FormServiceImpl implements FormService {
 	}
 
 	@Override
-	public Form updateForm(Form formUpdate, User user)
+	public Form updateForm(Form formUpdate)
 			throws InvalidInputException, RecordNotFoundException, RecordAlreadyExistsException {
 		log.info("Method updateForm started");
 		if (formUpdate == null) {
-			throw new InvalidInputException(ErrorCodes.INVALID_INPUT, "Invalid input parameters");
+			throw new InvalidInputException(ErrorCodes.INVALID_INPUT.getValue());
 		}
 
 		Form form = null;
 		form = getFormById(formUpdate.getId());
 		if (form == null) {
-			throw new RecordNotFoundException(ErrorCodes.RECORD_NOT_FOUND, "Specified record is not found");
+			throw new RecordNotFoundException(ErrorCodes.RECORD_NOT_FOUND.getValue());
 		}
-		form.setUpdatedBy(user.getFullName());
+		form.setUpdatedBy(formUpdate.getUpdatedBy());
 		form.setUpdatedOn(new DateTime());
 		form.setDeleted(formUpdate.isDeleted());
 		form.setDescription(formUpdate.getDescription());
@@ -133,8 +133,7 @@ public class FormServiceImpl implements FormService {
 		if (formList != null && !formList.isEmpty()) {
 			for (Form formIteration : formList) {
 				if (formIteration.equals(form)) {
-					throw new RecordAlreadyExistsException(ErrorCodes.RECORD_ALREADY_EXISTS,
-							"This Record already exists");
+					throw new RecordAlreadyExistsException(ErrorCodes.RECORD_ALREADY_EXISTS.getValue());
 				}
 			}
 		}
@@ -168,27 +167,50 @@ public class FormServiceImpl implements FormService {
 		return null;
 	}
 
+	/**
+	 * Searching a Form based on formCategory,formMls,Name and Description
+	 * Returning 
+        "id": 
+        "name":
+        "description":
+        "previewLink": 
+	 */
 	@Override
-	public List<Form> SearchAllForm() {
-		// TODO Auto-generated method stub
-		List<Form> form= new ArrayList<Form>();
-		formRepository.findAll().forEach(form::add);
-		return form;
-	}
-
-	@Override
-	public List<Form> SearchFormByMlsList(String mls) {
-		List<Form> form= new ArrayList<Form>();
-		form=formRepository.getFormByMlsList(mls);
-		return form;
-	}
-
-	@Override
-	public List<Form> SearchFormByCategoryList(String category) {
-		List<Form> form= new ArrayList<Form>();
-		form=formRepository.getFormByFormCategoryList(category);
-		return form;
+	public List<FormSearchResponse> SearchForm(String searchText, String formCategory, String formMls) {
+		List<FormSearchResponse> responseList = new ArrayList<>();
+				Iterable<Form> it = null;
+		//Iterable<Form>test=null;
+				
+		if(StringUtils.isBlank(searchText) && StringUtils.isBlank(formCategory) && StringUtils.isBlank(formMls)) {
+			it = formRepository.findAll();
+			log.info("1");
+		} else {
+			BoolQueryBuilder builder1 = QueryBuilders.boolQuery();	
+			if(StringUtils.isNotBlank(formMls)) {
+				builder1.must(QueryBuilders.matchQuery("mlsList", formMls));
+			}
+			if(StringUtils.isNotBlank(formCategory)) {
+				builder1.must(QueryBuilders.matchQuery("formCategoryList", formCategory));
+			}
+			if(StringUtils.isNotBlank(searchText)) {
+				builder1.should(QueryBuilders.matchQuery("name", searchText).boost(2))
+	            .should(QueryBuilders.matchQuery("description", searchText).boost(1));
+			}
+			it= formRepository.search(builder1);	
+			}
+		if(it != null) {
+			it.forEach(form -> {
+				FormSearchResponse response = new FormSearchResponse(); 
+				try {
+					BeanUtils.copyProperties(response,form);
+				} catch (InvocationTargetException|IllegalAccessException e) {
+					e.printStackTrace();
+				}
+				responseList.add(response);
+			});
 		}
-	
+		return responseList;
+	}
 
+	
 }
